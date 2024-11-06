@@ -47,7 +47,7 @@ The interpreter is divided into three main processing stages, each implemented a
 
 ## Testing Structure
 
-The project uses Jest for testing, with separate test suites for each module:
+The project uses Jest for testing, with separate test suites for each module.
 
 ## Development Setup
 

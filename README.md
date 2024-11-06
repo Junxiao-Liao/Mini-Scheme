@@ -4,7 +4,7 @@ The goal is to design and implement a mini-Scheme interpreter capable of handlin
 
 You can implement the interpreter in any programming language you are comfortable with.
 
-See [A Typescript implementation sample](https://github.com/Junxiao-Liao/Mini-Scheme/tree/main/ts-impl).
+See [a Typescript implementation sample](https://github.com/Junxiao-Liao/Mini-Scheme/tree/main/ts-impl).
 
 See [through guide](https://github.com/Junxiao-Liao/Mini-Scheme/tree/main/guide).
 
