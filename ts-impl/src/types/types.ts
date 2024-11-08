@@ -31,9 +31,25 @@ export type SchemeFunction = {
   func: (...args: SchemeValue[]) => SchemeValue;
 }
 
+// General.
 export class SchemeError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'SchemeError';
+  }
+}
+
+// For Variables and Assignments.
+export type SpecialForm = 'define' | 'set!';
+
+export class UndefinedVariableError extends SchemeError {
+  constructor(name: string) {
+    super(`Undefined variable: ${name}`);
+  }
+}
+
+export class InvalidArgumentError extends SchemeError {
+  constructor(message: string) {
+    super(`Invalid argument: ${message}`);
   }
 }

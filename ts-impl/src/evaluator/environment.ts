@@ -1,4 +1,4 @@
-import { SchemeValue, SchemeError } from '../types/types';
+import { SchemeValue, UndefinedVariableError } from '../types/types';
 
 export class Environment {
   private values: Map<string, SchemeValue>;
@@ -20,6 +20,23 @@ export class Environment {
     if (this.parent) {
       return this.parent.get(name);
     }
-    throw new SchemeError(`Undefined variable: ${name}`);
+    throw new UndefinedVariableError(name);
+  }
+
+  set(name: string, value: SchemeValue): void {
+    if (this.values.has(name)) {
+      this.values.set(name, value);
+      return;
+    }
+    if (this.parent && this.parent.values.has(name)) {
+      this.parent.set(name, value);
+      return;
+    }
+    throw new UndefinedVariableError(name);
+  }
+
+  // Helper method (to be used outside) to check if a variable exists in the current or parent environments
+  has(name: string): boolean {
+    return this.values.has(name) || (this.parent?.has(name) ?? false);
   }
 }

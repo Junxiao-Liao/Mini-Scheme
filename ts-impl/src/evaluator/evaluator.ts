@@ -1,16 +1,19 @@
-import { ASTNode, SchemeValue, SchemeError } from '../types/types';
-import { Environment } from '../evaluator/environment';
-import { primitives } from '../evaluator/primitives';
+import { ASTNode, SchemeValue, SchemeError, InvalidArgumentError, UndefinedVariableError } from '../types/types';
+import { Environment } from './environment';
+import { primitives } from './primitives';
 
 export class Evaluator {
   private env: Environment;
 
-  constructor() {
-    this.env = new Environment();
-    // Initialize environment with primitive procedures (add `+` `-` `*` `/` to the environment).
-    Object.entries(primitives).forEach(([name, func]) => {
-      this.env.define(name, func);
-    });
+  constructor(parentEnv?: Environment) {
+    this.env = new Environment(parentEnv);
+    // Initialize environment with primitive procedures
+    if (!parentEnv) {
+      // Add `+` `-` `*` `/` to the base environment.
+      Object.entries(primitives).forEach(([name, func]) => {
+        this.env.define(name, func);
+      });
+    }
   }
 
   evaluate(ast: ASTNode): SchemeValue {
@@ -29,19 +32,64 @@ export class Evaluator {
           return null;
         }
 
-        const [operator, ...operands] = ast.value;
-        const proc = this.evaluate(operator);
-
-        if (typeof proc !== 'object' || proc === null || proc.type !== 'primitive') {
-          throw new SchemeError(`${operator} is not a procedure`);
+        const [first, ...rest] = ast.value;
+        
+        // Handle special forms.
+        if (first.type === 'symbol') {
+          switch (first.value) {
+            case 'define':
+              return this.evaluateDefine(rest);
+            case 'set!':
+              return this.evaluateSet(rest);
+          }
         }
 
-        const args = operands.map(operand => this.evaluate(operand));
+        // Regular procedure call.
+        const proc = this.evaluate(first);
+        if (typeof proc !== 'object' || proc === null || proc.type !== 'primitive') {
+          throw new SchemeError(`${first.value} is not a procedure`);
+        }
+
+        const args = rest.map(expr => this.evaluate(expr));
         return proc.func(...args);
       }
 
       default:
         throw new SchemeError(`Unknown expression type: ${ast.type}`);
     }
+  }
+
+  private evaluateDefine(args: ASTNode[]): SchemeValue {
+    if (args.length !== 2) {
+      throw new InvalidArgumentError('define requires exactly 2 arguments');
+    }
+
+    const [nameNode, valueNode] = args;
+    if (nameNode.type !== 'symbol') {
+      throw new InvalidArgumentError('define requires a symbol as its first argument');
+    }
+
+    const value = this.evaluate(valueNode);
+    this.env.define(nameNode.value, value);
+    return null;
+  }
+
+  private evaluateSet(args: ASTNode[]): SchemeValue {
+    if (args.length !== 2) {
+      throw new InvalidArgumentError('set! requires exactly 2 arguments');
+    }
+
+    const [nameNode, valueNode] = args;
+    if (nameNode.type !== 'symbol') {
+      throw new InvalidArgumentError('set! requires a symbol as its first argument');
+    }
+
+    if (!this.env.has(nameNode.value)) {
+      throw new UndefinedVariableError(nameNode.value);
+    }
+
+    const value = this.evaluate(valueNode);
+    this.env.set(nameNode.value, value);
+    return null;
   }
 }
