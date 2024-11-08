@@ -1,16 +1,19 @@
-export type Token = {
-    type: 'number' | 'string' | 'symbol' | 'boolean' | 'leftParen' | 'rightParen';
-    value: string | number | boolean;
-  };
-  
-  export type ASTNode = {
-    type: 'number' | 'string' | 'symbol' | 'boolean' | 'list' | 'lambda' | 'quote';
-    value: any;
-  };
-  
-  export interface Environment {
-    define(name: string, value: any): void;
-    get(name: string): any;
-    set(name: string, value: any): void;
-  }
-  
+type TokenType = 
+  | 'number' 
+  | 'symbol' 
+  | 'leftParen' 
+  | 'rightParen' 
+  | 'boolean' 
+  | 'quote';
+
+export interface Token {
+  type: TokenType;
+  value: string | number | boolean;
+}
+
+export type ASTNode = 
+  | { type: 'number'; value: number }
+  | { type: 'boolean'; value: boolean }
+  | { type: 'symbol'; value: string }
+  | { type: 'list'; value: ASTNode[] }
+  | { type: 'quote'; value: ASTNode };
