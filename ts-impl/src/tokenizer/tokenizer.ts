@@ -1,4 +1,4 @@
-import { Token } from "src/types/types";
+import { Token } from "../types/types";
 
 export class Tokenizer {
   private input: string;
