@@ -1,3 +1,5 @@
+import { Environment } from "../evaluator/environment";
+
 // For tokenizer.
 type TokenType = 
   | 'number'
@@ -27,15 +29,11 @@ export type SchemeValue =
   | string
   | boolean
   | SchemeFunction
+  | SchemeUserFunction
   | null;
 
-export type SchemeFunction = {
-  type: 'primitive';
-  func: (...args: SchemeValue[]) => SchemeValue;
-}
-
 // General.
-export type SpecialForm = 'define' | 'set!' | 'if';
+export type SpecialForm = 'define' | 'set!' | 'if' | 'lambda';
 
 export class SchemeError extends Error {
   constructor(message: string) {
@@ -61,5 +59,24 @@ export class InvalidArgumentError extends SchemeError {
 export class ConditionalError extends SchemeError {
   constructor(message: string) {
     super(`Conditional error: ${message}`);
+  }
+}
+
+// For functions.
+export interface SchemeFunction {
+  type: 'primitive';
+  func: (...args: SchemeValue[]) => SchemeValue;
+}
+
+export interface SchemeUserFunction {
+  type: 'user';
+  params: string[];
+  body: ASTNode;
+  env: Environment;
+}
+
+export class FunctionError extends SchemeError {
+  constructor(message: string) {
+    super(`Function error: ${message}`);
   }
 }

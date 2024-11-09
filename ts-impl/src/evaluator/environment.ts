@@ -4,8 +4,8 @@ export class Environment {
   private values: Map<string, SchemeValue>;
   private parent: Environment | null;
 
-  constructor(parent: Environment | null = null) {
-    this.values = new Map();
+  constructor(parent: Environment | null = null, bindings: [string, SchemeValue][] = []) {
+    this.values = new Map(bindings);
     this.parent = parent;
   }
 
@@ -28,7 +28,7 @@ export class Environment {
       this.values.set(name, value);
       return;
     }
-    if (this.parent && this.parent.values.has(name)) {
+    if (this.parent  && this.parent.values.has(name)) {
       this.parent.set(name, value);
       return;
     }
@@ -38,5 +38,10 @@ export class Environment {
   // Helper method (to be used outside) to check if a variable exists in the current or parent environments
   has(name: string): boolean {
     return this.values.has(name) || (this.parent?.has(name) ?? false);
+  }
+
+  extend(params: string[], args: SchemeValue[]): Environment {
+    const bindings = params.map((param, i) => [param, args[i]] as [string, SchemeValue]);
+    return new Environment(this, bindings);
   }
 }

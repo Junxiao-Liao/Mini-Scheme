@@ -1,10 +1,12 @@
 import {
   ASTNode,
   SchemeValue,
+  SchemeUserFunction,
   SchemeError,
   InvalidArgumentError,
   UndefinedVariableError,
-  ConditionalError
+  ConditionalError,
+  FunctionError
 } from '../types/types';
 import { Environment } from './environment';
 import { primitives } from './primitives';
@@ -53,17 +55,16 @@ export class Evaluator {
               return this.evaluateSet(rest);
             case 'if':
               return this.evaluateIf(rest);
+            case 'lambda':
+              return this.evaluateLambda(rest);
           }
         }
 
         // Regular procedure call.
         const proc = this.evaluate(first);
-        if (typeof proc !== 'object' || proc === null || proc.type !== 'primitive') {
-          throw new SchemeError(`${first.value} is not a procedure`);
-        }
-
         const args = rest.map(expr => this.evaluate(expr));
-        return proc.func(...args);
+        
+        return this.apply(proc, args);
       }
 
       default:
@@ -77,13 +78,94 @@ export class Evaluator {
     }
 
     const [nameNode, valueNode] = args;
+
+    // Function definition syntax: (define (name params...) body)
+    if (nameNode.type === 'list') {
+      if (nameNode.value.length === 0) {
+        throw new FunctionError('Invalid function definition');
+      }
+
+      const [funcName, ...params] = nameNode.value;
+      if (funcName.type !== 'symbol') {
+        throw new FunctionError('Function name must be a symbol');
+      }
+
+      const paramNames = params.map(param => {
+        if (param.type !== 'symbol') {
+          throw new FunctionError('Parameter names must be symbols');
+        }
+        return param.value;
+      });
+
+      const lambda: SchemeUserFunction = {
+        type: 'user',
+        params: paramNames,
+        body: valueNode,
+        env: this.env
+      };
+
+      this.env.define(funcName.value, lambda);
+      return null;
+    }
+
+    // Variable definition
     if (nameNode.type !== 'symbol') {
-      throw new InvalidArgumentError('define requires a symbol as its first argument');
+      throw new InvalidArgumentError('First argument to define must be a symbol');
     }
 
     const value = this.evaluate(valueNode);
     this.env.define(nameNode.value, value);
     return null;
+  }
+
+  private evaluateLambda(args: ASTNode[]): SchemeUserFunction {
+    if (args.length < 2) {
+      throw new FunctionError('lambda requires at least 2 arguments');
+    }
+
+    const [paramsNode, ...bodyNodes] = args;
+    if (paramsNode.type !== 'list') {
+      throw new FunctionError('Lambda parameters must be a list');
+    }
+
+    const params = paramsNode.value.map(param => {
+      if (param.type !== 'symbol') {
+        throw new FunctionError('Parameter names must be symbols');
+      }
+      return param.value;
+    });
+
+    // Handle multiple expressions in body
+    const body: ASTNode = bodyNodes.length === 1 ? bodyNodes[0] : {
+      type: 'list',
+      value: [{ type: 'symbol', value: 'begin' }, ...bodyNodes]
+    };
+
+    return {
+      type: 'user',
+      params,
+      body,
+      env: this.env
+    };
+  }
+
+  private apply(proc: SchemeValue, args: SchemeValue[]): SchemeValue {
+    if (typeof proc === 'object' && proc !== null) {
+      if (proc.type === 'primitive') {
+        return proc.func(...args);
+      }
+      if (proc.type === 'user') {
+        if (proc.params.length !== args.length) {
+          throw new FunctionError(
+            `Expected ${proc.params.length} arguments but got ${args.length}`
+          );
+        }
+        const newEnv = proc.env.extend(proc.params, args);
+        const evaluator = new Evaluator(newEnv);
+        return evaluator.evaluate(proc.body);
+      }
+    }
+    throw new FunctionError(`${proc} is not a procedure`);
   }
 
   private evaluateSet(args: ASTNode[]): SchemeValue {
@@ -93,7 +175,7 @@ export class Evaluator {
 
     const [nameNode, valueNode] = args;
     if (nameNode.type !== 'symbol') {
-      throw new InvalidArgumentError('set! requires a symbol as its first argument');
+      throw new InvalidArgumentError('First argument to set! must be a symbol');
     }
 
     if (!this.env.has(nameNode.value)) {
