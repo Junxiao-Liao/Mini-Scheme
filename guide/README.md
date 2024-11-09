@@ -471,45 +471,7 @@ null
 25
 ```
 
-## Step 6: Implement Recursion
-
-### Objective
-
-Support recursive function calls.
-
-### Guide
-
-- **Recursive Functions**:
-    - Functions that call themselves within their body.
-
-- **Environment Handling**:
-    - Ensure that the function name is bound in its own environment so that recursive calls can find it.
-
-### Test Cases
-
-```
-(define (factorial n)
-  (if (= n 0)
-      1
-      (* n (factorial (- n 1)))))
-(factorial 5)
-(define (fib n)
-  (if (<= n 1)
-      n
-      (+ (fib (- n 1)) (fib (- n 2)))))
-(fib 6)
-```
-
-#### Expected Values
-
-```
-null
-120
-null
-8
-```
-
-## Step 7: Implement Basic Data Structures (Lists)
+## Step 6: Implement Basic Data Structures (Lists)
 
 ### Objective
 
