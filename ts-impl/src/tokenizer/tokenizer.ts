@@ -58,6 +58,37 @@ export class Tokenizer {
     };
   }
 
+  private readString(): Token {
+    this.advance(); // consume opening quote
+    let str = '';
+    
+    while (this.peek() && this.peek() !== '"') {
+      if (this.peek() === '\\') {
+        this.advance();
+        switch (this.peek()) {
+          case 'n': str += '\n'; break;
+          case 't': str += '\t'; break;
+          case '"': str += '"'; break;
+          case '\\': str += '\\'; break;
+          default: str += this.peek();
+        }
+        this.advance();
+      } else {
+        str += this.advance();
+      }
+    }
+
+    if (this.peek() !== '"') {
+      throw new Error('Unterminated string');
+    }
+    this.advance(); // consume closing quote
+
+    return {
+      type: 'string',
+      value: str
+    };
+  }
+
   private readSymbol(): Token {
     let symbol = '';
     while (this.position < this.input.length && this.isSymbolChar(this.peek())) {
@@ -97,6 +128,8 @@ export class Tokenizer {
       } else if (char === '\'') {
         tokens.push({ type: 'quote', value: '\'' });
         this.advance();
+      } else if (char === '"') {
+        tokens.push(this.readString());
       } else if (this.isDigit(char) || (char === '-' && this.isDigit(this.input[this.position + 1]))) {
         tokens.push(this.readNumber());
       } else if (this.isSymbolChar(char)) {

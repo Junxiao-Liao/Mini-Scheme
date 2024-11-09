@@ -44,6 +44,55 @@ export const primitives: Record<string, SchemeFunction> = {
       }
       return numbers.slice(1).reduce((a, b) => a / b, numbers[0]);
     }
+  },
+  '>': {
+    type: 'primitive',
+    func: (...args: SchemeValue[]): boolean => {
+      const numbers = checkNumbers(args);
+      if (numbers.length !== 2) {
+        throw new SchemeError('> requires exactly 2 arguments');
+      }
+      return numbers[0] > numbers[1];
+    }
+  },
+  '<': {
+    type: 'primitive',
+    func: (...args: SchemeValue[]): boolean => {
+      const numbers = checkNumbers(args);
+      if (numbers.length !== 2) {
+        throw new SchemeError('< requires exactly 2 arguments');
+      }
+      return numbers[0] < numbers[1];
+    }
+  },
+  '>=': {
+    type: 'primitive',
+    func: (...args: SchemeValue[]): boolean => {
+      const numbers = checkNumbers(args);
+      if (numbers.length !== 2) {
+        throw new SchemeError('>= requires exactly 2 arguments');
+      }
+      return numbers[0] >= numbers[1];
+    }
+  },
+  '<=': {
+    type: 'primitive',
+    func: (...args: SchemeValue[]): boolean => {
+      const numbers = checkNumbers(args);
+      if (numbers.length !== 2) {
+        throw new SchemeError('<= requires exactly 2 arguments');
+      }
+      return numbers[0] <= numbers[1];
+    }
+  },
+  '=': {
+    type: 'primitive',
+    func: (...args: SchemeValue[]): boolean => {
+      const numbers = checkNumbers(args);
+      if (numbers.length !== 2) {
+        throw new SchemeError('= requires exactly 2 arguments');
+      }
+      return numbers[0] === numbers[1];
+    }
   }
 };
-  

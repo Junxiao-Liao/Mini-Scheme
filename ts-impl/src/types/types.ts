@@ -1,10 +1,11 @@
 // For tokenizer.
 type TokenType = 
-  | 'number' 
-  | 'symbol' 
-  | 'leftParen' 
-  | 'rightParen' 
-  | 'boolean' 
+  | 'number'
+  | 'string'
+  | 'symbol'
+  | 'leftParen'
+  | 'rightParen'
+  | 'boolean'
   | 'quote';
 
 export interface Token {
@@ -14,6 +15,7 @@ export interface Token {
 
 export type ASTNode = 
   | { type: 'number'; value: number }
+  | { type: 'string'; value: string }
   | { type: 'boolean'; value: boolean }
   | { type: 'symbol'; value: string }
   | { type: 'list'; value: ASTNode[] }
@@ -21,8 +23,9 @@ export type ASTNode =
 
 // For evaluator.
 export type SchemeValue = 
-  | number 
-  | boolean 
+  | number
+  | string
+  | boolean
   | SchemeFunction
   | null;
 
@@ -32,6 +35,8 @@ export type SchemeFunction = {
 }
 
 // General.
+export type SpecialForm = 'define' | 'set!' | 'if';
+
 export class SchemeError extends Error {
   constructor(message: string) {
     super(message);
@@ -40,8 +45,6 @@ export class SchemeError extends Error {
 }
 
 // For Variables and Assignments.
-export type SpecialForm = 'define' | 'set!';
-
 export class UndefinedVariableError extends SchemeError {
   constructor(name: string) {
     super(`Undefined variable: ${name}`);
@@ -51,5 +54,12 @@ export class UndefinedVariableError extends SchemeError {
 export class InvalidArgumentError extends SchemeError {
   constructor(message: string) {
     super(`Invalid argument: ${message}`);
+  }
+}
+
+// For conditions.
+export class ConditionalError extends SchemeError {
+  constructor(message: string) {
+    super(`Conditional error: ${message}`);
   }
 }

@@ -29,6 +29,8 @@ export class Parser {
     switch (token.type) {
       case 'number':
         return { type: 'number', value: token.value as number };
+      case 'string':
+          return { type: 'string', value: token.value as string };
       case 'boolean':
         return { type: 'boolean', value: token.value as boolean };
       case 'symbol':
@@ -72,6 +74,7 @@ export class Parser {
       case 'quote':
         return this.parseQuote();
       case 'number':
+      case 'string':
       case 'boolean':
       case 'symbol':
         return this.parseAtom();

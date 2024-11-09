@@ -15,6 +15,17 @@ describe('Tokenizer', () => {
     });
   });
 
+  test('tokenizes numbers', () => {
+    const cases = [
+      ['"str"', [{ type: 'string', value: 'str' }]],
+      ['"\'"', [{ type: 'string', value: '\'' }]]
+    ];
+
+    cases.forEach(([input, expected]) => {
+      expect(new Tokenizer(input as string).tokenize()).toEqual(expected);
+    });
+  });
+
   test('tokenizes boolean values', () => {
     const cases = [
       ['#t', [{ type: 'boolean', value: true }]],

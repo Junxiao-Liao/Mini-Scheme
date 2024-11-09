@@ -36,6 +36,10 @@ Create a tokenizer to break input strings into tokens and a parser to convert to
 	- Left parenthesis: `(`
 	- Right parenthesis: `)`
 
+1. **String**
+
+    - Double quote: `"`
+
 2.  **Numbers**
 
 	- Integers: e.g., `0`, `42`, `-17`

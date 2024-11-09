@@ -14,6 +14,11 @@ describe('Parser', () => {
     expect(parse('-17')).toEqual({ type: 'number', value: -17 });
   });
 
+  test('parses strings', () => {
+    expect(parse('"str"')).toEqual({ type: 'string', value: 'str' });
+    expect(parse('"\'"')).toEqual({ type: 'string', value: '\'' });
+  })
+
   test('parses boolean values', () => {
     expect(parse('#t')).toEqual({ type: 'boolean', value: true });
     expect(parse('#f')).toEqual({ type: 'boolean', value: false });
