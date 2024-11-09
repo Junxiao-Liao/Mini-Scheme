@@ -30,6 +30,7 @@ export type SchemeValue =
   | boolean
   | SchemeFunction
   | SchemeUserFunction
+  | SchemeList
   | null;
 
 // General.
@@ -78,5 +79,18 @@ export interface SchemeUserFunction {
 export class FunctionError extends SchemeError {
   constructor(message: string) {
     super(`Function error: ${message}`);
+  }
+}
+
+// For lists.
+export interface SchemeList {
+  type: 'list';
+  car: SchemeValue;
+  cdr: SchemeList | SchemeValue | null;
+}
+
+export class ListError extends SchemeError {
+  constructor(message: string) {
+    super(`List error: ${message}`);
   }
 }

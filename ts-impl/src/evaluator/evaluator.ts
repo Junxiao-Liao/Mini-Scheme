@@ -2,11 +2,13 @@ import {
   ASTNode,
   SchemeValue,
   SchemeUserFunction,
+  SchemeList,
   SchemeError,
   InvalidArgumentError,
   UndefinedVariableError,
   ConditionalError,
-  FunctionError
+  FunctionError,
+  ListError
 } from '../types/types';
 import { Environment } from './environment';
 import { primitives } from './primitives';
@@ -22,6 +24,7 @@ export class Evaluator {
       Object.entries(primitives).forEach(([name, func]) => {
         this.env.define(name, func);
       });
+      this.env.define('null', null);
     }
   }
 
@@ -67,8 +70,26 @@ export class Evaluator {
         return this.apply(proc, args);
       }
 
+      case 'quote':
+        return this.buildSchemeList(ast.value); // Build SchemeList here
+
       default:
-        throw new SchemeError(`Unknown expression type: ${ast.type}`);
+        throw new SchemeError(`Unknown expression type: ${ast}`);
+    }
+  }
+
+  private buildSchemeList(astNode: ASTNode): SchemeList | SchemeValue { // Correct return type
+    if (astNode.type === 'list') {
+      if (astNode.value.length === 0) {
+        return null; // Represent empty list as null
+      }
+      return {
+        type: 'list',
+        car: this.evaluate(astNode.value[0]), // Evaluate car
+        cdr: this.buildSchemeList({ type: 'list', value: astNode.value.slice(1) }) // Recursively build cdr
+      };
+    } else {
+      return this.evaluate(astNode); // Evaluate other quoted values
     }
   }
 
@@ -152,6 +173,20 @@ export class Evaluator {
   private apply(proc: SchemeValue, args: SchemeValue[]): SchemeValue {
     if (typeof proc === 'object' && proc !== null) {
       if (proc.type === 'primitive') {
+        // Add argument length checking for list operations
+        switch (proc.func.name) {
+          case 'cons':
+            if (args.length !== 2) {
+              throw new ListError('cons requires exactly 2 arguments');
+            }
+            break;
+          case 'car':
+          case 'cdr':
+            if (args.length !== 1) {
+              throw new ListError(`${proc.func.name} requires exactly 1 argument`);
+            }
+            break;
+        }
         return proc.func(...args);
       }
       if (proc.type === 'user') {

@@ -1,4 +1,4 @@
-import { SchemeValue, SchemeFunction, SchemeError } from '../types/types';
+import { SchemeValue, SchemeFunction, SchemeList, SchemeError, ListError } from '../types/types';
 
 function checkNumbers(args: SchemeValue[]): number[] {
   return args.map(arg => {
@@ -94,5 +94,39 @@ export const primitives: Record<string, SchemeFunction> = {
       }
       return numbers[0] === numbers[1];
     }
-  }
+  },
+  'cons': {
+    type: 'primitive',
+    func: function cons(car: SchemeValue, cdr: SchemeValue): SchemeList {
+      return { 
+        type: 'list', 
+        car, 
+        cdr: cdr === null ? null : cdr as SchemeList 
+      };
+    }
+  },
+  'car': {
+    type: 'primitive',
+    func: function car(lst: SchemeValue): SchemeValue {
+      if (lst === null) {
+        throw new ListError('car: cannot take car of empty list');
+      }
+      if (typeof lst !== 'object' || lst.type !== 'list') {
+        throw new ListError('car: argument must be a list');
+      }
+      return (lst as SchemeList).car;
+    }
+  },
+  'cdr': {
+    type: 'primitive',
+    func: function cdr(lst: SchemeValue): SchemeValue {
+      if (lst === null) {
+        throw new ListError('cdr: cannot take cdr of empty list');
+      }
+      if (typeof lst !== 'object' || lst.type !== 'list') {
+        throw new ListError('cdr: argument must be a list');
+      }
+      return (lst as SchemeList).cdr;
+    }
+  },
 };
