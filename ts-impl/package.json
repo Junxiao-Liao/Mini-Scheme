@@ -4,7 +4,10 @@
   "description": "TS implementation for Mini-Scheme.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "repl": "npm run build && npm run start"
   },
   "repository": {
     "type": "git",
@@ -23,6 +26,7 @@
     "@eslint/js": "^9.14.0",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.13.0",
     "@typescript-eslint/parser": "^8.13.0",
     "eslint": "^9.14.0",

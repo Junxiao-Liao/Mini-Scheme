@@ -61,7 +61,7 @@ npm install
 npm test
 ```
 
-3. Build the project:
+3. Build and Run the project:
 ```bash
-npm run build
+npm run repl
 ```
